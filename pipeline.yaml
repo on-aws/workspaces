@@ -39,6 +39,7 @@ Mappings:
     TEMPLATE:
       VPC: VPCSource::template.yaml
       DIRECTORY: DIRECTORYSource::template.yaml
+      WORKSPACES: WORKSPACESSource::template.yaml
 
 Resources:
   Artifacts:
@@ -231,6 +232,32 @@ Resources:
                   OutputFileName: output.json
                 RunOrder: 2
               - !Ref AWS::NoValue
+            - Name: WORKSPACES
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: WORKSPACESSource
+                - Name: DIRECTORYOutput
+              OutputArtifacts:
+                - Name: WORKSPACESOutput
+              Configuration:
+                StackName: !Join
+                  - '-'
+                  - - !Select [0, !Split ['/', !Ref Tag]]
+                    - !Select [1, !Split ['/', !Ref Tag]]
+                ActionMode: CREATE_UPDATE
+                RoleArn: !GetAtt CodePipelineRole.Arn
+                TemplatePath: !FindInMap [ CONST, TEMPLATE, WORKSPACES ]
+                ParameterOverrides: !Sub |
+                  {
+                    "Tag": "${Tag}",
+                    "DirectoryId": { "Fn::GetParam" : ["DIRECTORYOutput", "output.json", "Directory"]}
+                  }
+                OutputFileName: output.json
+              RunOrder: 3
 
   # DELETE pipeline is for costs optimization (check optional/frugality/template.yaml).
   # You can also run this pipeline to conveniently delete all the resources when you no longer needed them to avoid unnecessary charges.
@@ -269,6 +296,22 @@ Resources:
               RunOrder: 1
         - Name: Delete
           Actions:
+            - Name: WORKSPACES
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: Source
+              Configuration:
+                StackName: !Join
+                  - '-'
+                  - - !Select [0, !Split ['/', !Ref Tag]]
+                    - !Select [1, !Split ['/', !Ref Tag]]
+                ActionMode: DELETE_ONLY
+                RoleArn: !GetAtt CodePipelineRole.Arn
+              RunOrder: 1
             - !If
               - CREATEDIRECTORY
               - Name: DIRECTORY
@@ -287,7 +330,7 @@ Resources:
                       - directory
                   ActionMode: DELETE_ONLY
                   RoleArn: !GetAtt CodePipelineRole.Arn
-                RunOrder: 1
+                RunOrder: 2
               - !Ref AWS::NoValue
             - Name: VPC
               ActionTypeId:
@@ -305,4 +348,4 @@ Resources:
                     - vpc
                 ActionMode: DELETE_ONLY
                 RoleArn: !GetAtt CodePipelineRole.Arn
-              RunOrder: !If [CREATEDIRECTORY, 2, 1]
+              RunOrder: !If [CREATEDIRECTORY, 3, 2]

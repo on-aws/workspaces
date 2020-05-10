@@ -82,6 +82,22 @@ Resources:
                 Action:
                   - iam:PassRole
                 Resource: '*'
+              - !If # The following permissions required by https://github.com/on-aws/directories/blob/master/template.yaml
+                - CREATEDIRECTORY
+                - Effect: Allow
+                  Action:
+                    - secretsmanager:CreateSecret
+                    - secretsmanager:DeleteSecret
+                    - secretsmanager:TagResource
+                    - secretsmanager:UntagResource
+                    - secretsmanager:GetRandomPassword
+                    - secretsmanager:GetSecretValue
+                    - secretsmanager:PutSecretValue
+                    - ds:DescribeDirectories
+                    - ds:CreateDirectory
+                    - ds:DeleteDirectory
+                  Resource: '*'
+                - !Ref AWS::NoValue
 
   Create:
     Type: AWS::CodePipeline::Pipeline
@@ -194,6 +210,7 @@ Resources:
                   Provider: CloudFormation
                 InputArtifacts:
                   - Name: DIRECTORYSource
+                  - Name: VPCOutput
                 OutputArtifacts:
                   - Name: DIRECTORYOutput
                 Configuration:
@@ -207,7 +224,9 @@ Resources:
                   TemplatePath: !FindInMap [ CONST, TEMPLATE, DIRECTORY ]
                   ParameterOverrides: !Sub |
                     {
-                      "Tag": "${Tag}"
+                      "Tag": "${Tag}",
+                      "VPC": { "Fn::GetParam" : ["VPCOutput", "output.json", "VPC"]},
+                      "PrivateSubnets": { "Fn::GetParam" : ["VPCOutput", "output.json", "PrivateSubnets"]}
                     }
                   OutputFileName: output.json
                 RunOrder: 2

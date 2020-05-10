@@ -28,3 +28,8 @@ Resources:
         ComputeTypeName: STANDARD
         RunningMode: AUTO_STOP
         RunningModeAutoStopTimeoutInMinutes: 60
+      Tags:
+        - Key: App
+          Value: !Ref Tag
+        - Key: Name
+          Value: !Ref Tag

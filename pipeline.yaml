@@ -1,0 +1,208 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Pipeline for ON-AWS/workspaces. **WARNING** This template creates an AWS CodePipeline.
+  You will be billed for the AWS resources used if you run pipeline.
+
+Parameters:
+  Tag:
+    Description: We tag all AWS resources for your convinience.
+    ConstraintDescription: Forward Slash required
+    AllowedPattern: '^\S+\/\S+'
+    Type: String
+    Default: on-aws/workspaces
+
+  OAuthToken:
+    Description: GitHub Personal Access Token
+    Type: String
+    NoEcho: true
+
+  Branch:
+    Description: Specify which branch you want to follow
+    Type: String
+    Default: master
+    AllowedValues:
+      - develop
+      - master
+
+Mappings:
+  CONST:
+    TEMPLATE:
+      VPC: VPCSource::template.yaml
+
+Resources:
+  Artifacts:
+    Type: AWS::S3::Bucket
+    Properties:
+      VersioningConfiguration:
+        Status: Enabled
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - codepipeline.amazonaws.com
+                - cloudformation.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+        - arn:aws:iam::aws:policy/AmazonS3FullAccess
+        - arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
+        - arn:aws:iam::aws:policy/AmazonVPCFullAccess
+      Policies:
+        -
+          PolicyName: !Ref AWS::StackName
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - iam:PassRole
+                Resource: '*'
+
+  Create:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Join
+        - '-'
+        - - !Select [0, !Split ['/', !Ref Tag]]
+          - !Select [1, !Split ['/', !Ref Tag]]
+          - create
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref Artifacts
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: !Join
+                - '-'
+                - - !Select [0, !Split ['/', !Ref Tag]]
+                  - !Select [1, !Split ['/', !Ref Tag]]
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: WORKSPACESSource
+              Configuration:
+                Owner: on-aws
+                Repo: workspaces
+                PollForSourceChanges: false
+                Branch: master
+                OAuthToken: !Ref OAuthToken
+              RunOrder: 1
+            - Name: !Join
+                - '-'
+                - - !Select [0, !Split ['/', !Ref Tag]]
+                  - !Select [1, !Split ['/', !Ref Tag]]
+                  - vpc
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: VPCSource
+              Configuration:
+                Owner: on-aws
+                Repo: vpc
+                PollForSourceChanges: false
+                Branch: !Ref Branch
+                OAuthToken: !Ref OAuthToken
+              RunOrder: 1
+        - Name: Deploy
+          Actions:
+            - Name: VPC
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: VPCSource
+              OutputArtifacts:
+                - Name: VPCOutput
+              Configuration:
+                StackName: !Join
+                  - '-'
+                  - - !Select [0, !Split ['/', !Ref Tag]]
+                    - !Select [1, !Split ['/', !Ref Tag]]
+                    - vpc
+                ActionMode: CREATE_UPDATE
+                RoleArn: !GetAtt CodePipelineRole.Arn
+                TemplatePath: !FindInMap [ CONST, TEMPLATE, VPC ]
+                ParameterOverrides: !Sub |
+                  {
+                    "Tag": "${Tag}"
+                  }
+                OutputFileName: output.json
+              RunOrder: 1
+
+  # DELETE pipeline is for costs optimization (check optional/frugality/template.yaml).
+  # You can also run this pipeline to conveniently delete all the resources when you no longer needed them to avoid unnecessary charges.
+  Delete:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Join
+        - '-'
+        - - !Select [0, !Split ['/', !Ref Tag]]
+          - !Select [1, !Split ['/', !Ref Tag]]
+          - delete
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      ArtifactStore:
+        Type: S3
+        Location: !Ref Artifacts
+      DisableInboundStageTransitions:
+        - StageName: Delete
+          Reason: Do not enable this transition. In use by automation.
+      Stages:
+        - Name: Source
+          Actions:
+            - Name: Source
+              ActionTypeId:
+                Category: Source
+                Owner: ThirdParty
+                Version: 1
+                Provider: GitHub
+              OutputArtifacts:
+                - Name: Source
+              Configuration:
+                Owner: on-aws
+                Repo: workspaces
+                PollForSourceChanges: false
+                Branch: !Ref Branch
+                OAuthToken: !Ref OAuthToken
+              RunOrder: 1
+        - Name: Delete
+          Actions:
+            - Name: VPC
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: Source
+              Configuration:
+                StackName: !Join
+                  - '-'
+                  - - !Select [0, !Split ['/', !Ref Tag]]
+                    - !Select [1, !Split ['/', !Ref Tag]]
+                    - vpc
+                ActionMode: DELETE_ONLY
+                RoleArn: !GetAtt CodePipelineRole.Arn
+              RunOrder: 1

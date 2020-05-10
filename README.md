@@ -14,14 +14,12 @@ Usually you would prefer to use [CloudFormation Nested Stacks](https://docs.aws.
 4. :moneybag:(OPTIONAL) You can deploy an optional CloudFormation Stack  **on-aws-workspaces-frugality** by using https://github.com/on-aws/frugality/template.yaml. This stack allows you to schedule execution of **on-aws-workspaces-pipeline** in the morning (hence to provision all the required resources) and **on-aws-workspaces-delete** at night (hence to delete al lthe resources).
 **Why do I need it?** _Well this deployment produces several AWS resources which you will be charged for. Very first one is [Amazon VPC NAT gateway](https://aws.amazon.com/vpc/pricing/). Deleting it overnight will help to save some money in your pocket. In general we are trying to make sure that all data survived this harsh exercise and available for you next morning. **WARNING:** FRUGALITY DOES NOT GUARANTEE PERSISTENCE OF YOUR DATA YET. **But** we'll make sure to find a way to make it happen._ :point_right:So you should weight your usecase before applying this optional step.
 5. :end:We are sorry to see you go. But our lives go on. And sometime we nned to clean a mess created previously. **on-aws-workspaces-delete** pipeline is exactly for this case (in addition to the optional :four:). It will delete all the AWS resources (including [Amazon CloudWatch Log Groups](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/Working-with-log-groups-and-streams.html)), except data artifacts (if applicable for this deployment). Though few extra steps are required to completely wiped all memories:
-  5.1 First make sure that you deleted all essential resources by **Release change** for **on-aws-workspaces-delete** pipeline
-  5.2 Open [AWS Cloud Formation Console](https://console.aws.amazon.com/cloudformation)
-  5.3 Find **on-aws-workspaces-create** and click **Delete**
-  5.4 **IMPORTANT** You will see an error **The bucket you tried to delete is not empty. You must delete all versions in the bucket.**. This is not a bug. But a protective feature. This is your last chance to rethink tour decision.
-
-    5.4.1 You can go and delete mentioned Amazon S3 bucket trough [Amazon S3 Console](https://s3.console.aws.amazon.com/s3).
-    5.4.2 Or you can click **Delete** one more time and exclude S3 bucket resource from deletion.
-
-  5.5 Find **on-aws-workspaces-delete** and click **Delete**.
-  5.6 (OPTIONAL) Find and delete **on-aws-workspaces-frugality** if you were using it.
+  5.1. First make sure that you deleted all essential resources by **Release change** for **on-aws-workspaces-delete** pipeline
+  5.2. Open [AWS Cloud Formation Console](https://console.aws.amazon.com/cloudformation)
+  5.3. Find **on-aws-workspaces-create** and click **Delete**
+  5.4. **IMPORTANT** You will see an error **The bucket you tried to delete is not empty. You must delete all versions in the bucket.**. This is not a bug. But a protective feature. This is your last chance to rethink tour decision.
+    5.4.1. You can go and delete mentioned Amazon S3 bucket trough [Amazon S3 Console](https://s3.console.aws.amazon.com/s3).
+    5.4.2. Or you can click **Delete** one more time and exclude S3 bucket resource from deletion.
+  5.5. Find **on-aws-workspaces-delete** and click **Delete**.
+  5.6. (OPTIONAL) Find and delete **on-aws-workspaces-frugality** if you were using it.
 

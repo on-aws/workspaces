@@ -103,11 +103,22 @@ Resources:
                     - secretsmanager:GetRandomPassword
                     - secretsmanager:GetSecretValue
                     - secretsmanager:PutSecretValue
+                    - ds:AddTagsToResource
                     - ds:DescribeDirectories
                     - ds:CreateDirectory
                     - ds:DeleteDirectory
+                    - ds:CheckAlias
+                    - ds:CreateAlias
+                    - ds:EnableSso
+
                   Resource: '*'
                 - !Ref AWS::NoValue
+              - # The following permissions required by template.yaml
+                Effect: Allow
+                Action:
+                  - workspaces:CreateWorkspaces
+                  - workspaces:DeleteWorkspaces
+                Resource: '*'
 
   Create:
     Type: AWS::CodePipeline::Pipeline

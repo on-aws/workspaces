@@ -1,5 +1,5 @@
 ## Some ideas worth sharing and for us to remember
 
 1. **HOW TO** Use [CloudFormation Condition Function IF](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/intrinsic-function-reference-conditions.html#intrinsic-function-reference-conditions-if) and [CloudFormation Pseudo parameter NoValue](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/pseudo-parameter-reference.html#cfn-pseudo-param-novalue) to **CONDITIONALLY CREATE AWS CodePipeline STAGE**.<br/>:eyes:Check CloudFormation **Create** and **Delete** resource at [pipeline.yaml](pipeline.yaml)
-2. **HOW TO** You can
+2. **HOW TO** You can apply the same approach from above to conditionally attach [AWS IAM Policies](https://docs.aws.amazon.com/IAM/latest/UserGuide/access_policies.html) to your [AWS IAM Roles](https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles.html).<br/>:eyes:Check CloudFormation **CodePipelineRole** resource at [pipeline.yaml](pipeline.yaml)
 3. **BEST PRACTICE** Document usage of AWS IAM Policies. So you know what to remove later in case of you stack changed (new CloudFormation template added and/or more importantely deleted).<br/>:eyes:Check CloudFormation **CodePipelineRole** resource at [pipeline.yaml](pipeline.yaml)

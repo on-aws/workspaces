@@ -3,7 +3,7 @@ My children decided to take some Python cources during [COVID-19](https://en.wik
 
 :guardsman:**Security** without compromises is a must for us. That is why we are using Amazon Web Services ([AWS](https://aws.amazon.com/)) applying all the best practicies (including but not limited to the runnning all our workloads inside an [Amazon VPC](https://aws.amazon.com/vpc/) private subnets).
 
-:stop_sign::point_right: DON'T FORGET TO CHECK [NOTES.md](NOTES.md) if you want to understand more about some of the ideas wused hile authoring CloudFormation Templates.
+:stop_sign::point_right: DON'T FORGET TO CHECK [NOTES.md](NOTES.md) if you want to understand more about some of the ideas used while authoring CloudFormation Templates.
 
 ## How to install by using AWS CodePipeline
 We are using **CodePipeline** as a primary method to a deploy.

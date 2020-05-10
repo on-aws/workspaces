@@ -18,8 +18,10 @@ Usually you would prefer to use [CloudFormation Nested Stacks](https://docs.aws.
   5.2 Open [AWS Cloud Formation Console](https://console.aws.amazon.com/cloudformation)
   5.3 Find **on-aws-workspaces-create** and click **Delete**
   5.4 **IMPORTANT** You will see an error **The bucket you tried to delete is not empty. You must delete all versions in the bucket.**. This is not a bug. But a protective feature. This is your last chance to rethink tour decision.
+
     5.4.1 You can go and delete mentioned Amazon S3 bucket trough [Amazon S3 Console](https://s3.console.aws.amazon.com/s3)
     5.4.2 Or you can click **Delete** one more time and exclude S3 bucket resource from deletion.
+
   5.5 Find **on-aws-workspaces-delete** and click **Delete**
   5.6 (OPTIONAL) Find and delete **on-aws-workspaces-frugality** if you were using it.
 

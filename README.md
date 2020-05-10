@@ -7,7 +7,7 @@ My children decided to take some Python cources during [COVID-19](https://en.wik
 
 ## How to install by using AWS CodePipeline
 We are using **CodePipeline** as a primary method to a deploy.
-This is very opinionated approach to deploy something outside of normal development process.
+This is very opinionated approach to deploy something outside of a normal development process.
 Usually you would prefer to use [CloudFormation Nested Stacks](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/using-cfn-nested-stacks.html) when you deploy several dependant CloudFormation stacks. And, probably, it is the most correct approach to be honest. So we should support it as well :)
 
 1. Create  CloudFormation Stack by using [pipeline.yaml](pipeline.yaml) template. Name it **on-aws-workspaces-pipeline**. You can name it differntely. But it is what we are using ourselves. We recommend to use default provided value for the **Tag** CloudFormation parameter.

@@ -1,5 +1,5 @@
 # ON-AWS/WORSPACES
-My children decided to take some Python cources during [COVID-19](https://en.wikipedia.org/wiki/Coronavirus_disease_2019) outbreak. We decided to use [Amazon Workspaces](https://aws.amazon.com/workspaces/) for them. So they can use their **Chromebooks** to access remote Linux system provided by [Amazon Workspaces](https://aws.amazon.com/workspaces/). Hence this projected created.
+My children decided to take some Python cources during [COVID-19](https://en.wikipedia.org/wiki/Coronavirus_disease_2019) outbreak. We decided to use [Amazon Workspaces](https://aws.amazon.com/workspaces/) for them. So they can use their **Chromebooks** to access remote Linux system provided by [Amazon Workspaces](https://aws.amazon.com/workspaces/). Hence this projecte created.
 
 :guardsman:**Security** without compromises is a must for us. That is why we are using Amazon Web Services ([AWS](https://aws.amazon.com/)) applying all the best practicies (including but not limited to the runnning all our workloads inside an [Amazon VPC](https://aws.amazon.com/vpc/) private subnets).
 

@@ -12,22 +12,33 @@ Parameters:
     Default: on-aws/workspaces
 
   OAuthToken:
-    Description: GitHub Personal Access Token
+    Description: GitHub Personal Access Token.
     Type: String
     NoEcho: true
 
   Branch:
-    Description: Specify which branch you want to follow
+    Description: Specify which branch you want to follow.
     Type: String
     Default: master
     AllowedValues:
       - develop
       - master
 
+  DirectoryId:
+    Description: >-
+      (Optional) Provide existing AWS Directory Service Id.
+      New AWS Directory Service will be created if this parameter is not specified.
+    Type: String
+
+Conditions:
+  CREATEDIRECTORY:
+    !Equals [!Ref DirectoryId, '']
+
 Mappings:
   CONST:
     TEMPLATE:
       VPC: VPCSource::template.yaml
+      DIRECTORY: DIRECTORYSource::template.yaml
 
 Resources:
   Artifacts:
@@ -102,7 +113,7 @@ Resources:
                 Owner: on-aws
                 Repo: workspaces
                 PollForSourceChanges: false
-                Branch: master
+                Branch: !Ref Branch
                 OAuthToken: !Ref OAuthToken
               RunOrder: 1
             - Name: !Join
@@ -121,9 +132,31 @@ Resources:
                 Owner: on-aws
                 Repo: vpc
                 PollForSourceChanges: false
-                Branch: !Ref Branch
+                Branch: master
                 OAuthToken: !Ref OAuthToken
               RunOrder: 1
+            - !If
+              - CREATEDIRECTORY
+              - Name: !Join
+                  - '-'
+                  - - !Select [0, !Split ['/', !Ref Tag]]
+                    - !Select [1, !Split ['/', !Ref Tag]]
+                    - directory
+                ActionTypeId:
+                  Category: Source
+                  Owner: ThirdParty
+                  Version: 1
+                  Provider: GitHub
+                OutputArtifacts:
+                  - Name: DIRECTORYSource
+                Configuration:
+                  Owner: on-aws
+                  Repo: directories
+                  PollForSourceChanges: false
+                  Branch: master
+                  OAuthToken: !Ref OAuthToken
+                RunOrder: 2
+              - !Ref AWS::NoValue
         - Name: Deploy
           Actions:
             - Name: VPC
@@ -151,6 +184,34 @@ Resources:
                   }
                 OutputFileName: output.json
               RunOrder: 1
+            - !If
+              - CREATEDIRECTORY
+              - Name: DIRECTORY
+                ActionTypeId:
+                  Category: Deploy
+                  Owner: AWS
+                  Version: 1
+                  Provider: CloudFormation
+                InputArtifacts:
+                  - Name: DIRECTORYSource
+                OutputArtifacts:
+                  - Name: DIRECTORYOutput
+                Configuration:
+                  StackName: !Join
+                    - '-'
+                    - - !Select [0, !Split ['/', !Ref Tag]]
+                      - !Select [1, !Split ['/', !Ref Tag]]
+                      - directory
+                  ActionMode: CREATE_UPDATE
+                  RoleArn: !GetAtt CodePipelineRole.Arn
+                  TemplatePath: !FindInMap [ CONST, TEMPLATE, DIRECTORY ]
+                  ParameterOverrides: !Sub |
+                    {
+                      "Tag": "${Tag}"
+                    }
+                  OutputFileName: output.json
+                RunOrder: 2
+              - !Ref AWS::NoValue
 
   # DELETE pipeline is for costs optimization (check optional/frugality/template.yaml).
   # You can also run this pipeline to conveniently delete all the resources when you no longer needed them to avoid unnecessary charges.
@@ -189,6 +250,26 @@ Resources:
               RunOrder: 1
         - Name: Delete
           Actions:
+            - !If
+              - CREATEDIRECTORY
+              - Name: DIRECTORY
+                ActionTypeId:
+                  Category: Deploy
+                  Owner: AWS
+                  Version: 1
+                  Provider: CloudFormation
+                InputArtifacts:
+                  - Name: Source
+                Configuration:
+                  StackName: !Join
+                    - '-'
+                    - - !Select [0, !Split ['/', !Ref Tag]]
+                      - !Select [1, !Split ['/', !Ref Tag]]
+                      - directory
+                  ActionMode: DELETE_ONLY
+                  RoleArn: !GetAtt CodePipelineRole.Arn
+                RunOrder: 1
+              - !Ref AWS::NoValue
             - Name: VPC
               ActionTypeId:
                 Category: Deploy
@@ -205,4 +286,4 @@ Resources:
                     - vpc
                 ActionMode: DELETE_ONLY
                 RoleArn: !GetAtt CodePipelineRole.Arn
-              RunOrder: 1
+              RunOrder: !If [CREATEDIRECTORY, 2, 1]

@@ -96,7 +96,7 @@ Resources:
               console.error(err);
               console.error(err.code);
               console.error(event.RequestType);
-              if !(err.code === 'ResourceNotFoundException' && event.RequestType === 'Delete') {
+              if (err.code !== 'ResourceNotFoundException' || event.RequestType !== 'Delete') {
                 await cfnResponse(event, 'FAILED', context.logStreamName, err.message);
               }
             }

@@ -49,10 +49,6 @@ Resources:
                 Effect: Allow
                 Action:
                   - workspaces:*
-                Resource: !Sub arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:*/*
-              -
-                Effect: Allow
-                Action:
                   - workdocs:RegisterDirectory
                   - workdocs:DeregisterDirectory
                   - workdocs:AddUserToGroup

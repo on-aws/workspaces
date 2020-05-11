@@ -93,16 +93,17 @@ Resources:
                 });
 
                 request.on('error', (err) => {
-                  console.log({ error });
-                  reject(error);
+                  console.log({ err });
+                  reject(err);
                 });
 
                 request.write(responseBody);
                 request.end();
               }).catch(err => {
                 console.log(err);
-                reject(err);
+                throw err;
               });
+            }
           };
 
   EnableWorkSpaces:

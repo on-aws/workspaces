@@ -126,6 +126,7 @@ Resources:
                   - lambda:GetFunction
                   - lambda:GetFunctionConfiguration
                   - lambda:CreateFunction
+                  - lambda:UpdateFunctionCode
                   - lambda:DeleteFunction
                 Resource: '*'
               - # The following permissions required by template.yaml

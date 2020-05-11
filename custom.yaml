@@ -95,10 +95,12 @@ Resources:
             } catch(err) {
               console.error(err);
               if (err.code !== 'ResourceNotFoundException' || event.RequestType !== 'Delete') {
-                return await cfnResponse(event, 'FAILED', context.logStreamName, err.message);
+                await cfnResponse(event, 'FAILED', context.logStreamName, err.message);
+                return;
               }
             }
-            return await cfnResponse(event, 'SUCCESS', context.logStreamName, 'SUCCESS');
+            await cfnResponse(event, 'SUCCESS', context.logStreamName, 'SUCCESS');
+            return;
           };
 
           async function cfnResponse (event, responseStatus, PhysicalResourceId, Reason) {

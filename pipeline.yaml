@@ -238,32 +238,6 @@ Resources:
                   }
                 OutputFileName: output.json
               RunOrder: 1
-            - Name: CUSTOM
-              ActionTypeId:
-                Category: Deploy
-                Owner: AWS
-                Version: 1
-                Provider: CloudFormation
-              InputArtifacts:
-                - Name: WORKSPACESSource
-              OutputArtifacts:
-                - Name: CUSTOMOutput
-              Configuration:
-                StackName: !Join
-                  - '-'
-                  - - !Select [0, !Split ['/', !Ref Tag]]
-                    - !Select [1, !Split ['/', !Ref Tag]]
-                    - custom
-                ActionMode: CREATE_UPDATE
-                RoleArn: !GetAtt CodePipelineRole.Arn
-                TemplatePath: !FindInMap [ CONST, TEMPLATE, CUSTOM ]
-                Capabilities: CAPABILITY_IAM
-                ParameterOverrides: !Sub |
-                  {
-                    "Tag": "${Tag}"
-                  }
-                OutputFileName: output.json
-              RunOrder: 1
             - !If
               - CREATEDIRECTORY
               - Name: DIRECTORY
@@ -295,6 +269,34 @@ Resources:
                   OutputFileName: output.json
                 RunOrder: 2
               - !Ref AWS::NoValue
+            - Name: CUSTOM
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: WORKSPACESSource
+                - Name: DIRECTORYOutput
+              OutputArtifacts:
+                - Name: CUSTOMOutput
+              Configuration:
+                StackName: !Join
+                  - '-'
+                  - - !Select [0, !Split ['/', !Ref Tag]]
+                    - !Select [1, !Split ['/', !Ref Tag]]
+                    - custom
+                ActionMode: CREATE_UPDATE
+                RoleArn: !GetAtt CodePipelineRole.Arn
+                TemplatePath: !FindInMap [ CONST, TEMPLATE, CUSTOM ]
+                Capabilities: CAPABILITY_IAM
+                ParameterOverrides: !Sub |
+                  {
+                    "Tag": "${Tag}",
+                    "DirectoryId": { "Fn::GetParam" : ["DIRECTORYOutput", "output.json", "Directory"]}
+                  }
+                OutputFileName: output.json
+              RunOrder: !If [CREATEDIRECTORY, 3, 2]
             - Name: WORKSPACES
               ActionTypeId:
                 Category: Deploy
@@ -325,7 +327,7 @@ Resources:
                     "BundledId": "${BundledId}"
                   }
                 OutputFileName: output.json
-              RunOrder: !If [CREATEDIRECTORY, 3, 2]
+              RunOrder: !If [CREATEDIRECTORY, 4, 3]
 
   # DELETE pipeline is for costs optimization (check optional/frugality/template.yaml).
   # You can also run this pipeline to conveniently delete all the resources when you no longer needed them to avoid unnecessary charges.

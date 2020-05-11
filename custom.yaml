@@ -5,6 +5,10 @@ Parameters:
     Description: We tag all AWS resources for your convinience.
     Type: String
 
+  DirectoryId:
+    Description: Provide existing AWS Directory Service Id.
+    Type: String
+
 Resources:
   LambdaRole:
     Type: AWS::IAM::Role
@@ -27,12 +31,17 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              - # grant the ability to enable Amazon WorkDocs for users within Amazon WorkSpaces
-                # https://docs.aws.amazon.com/workspaces/latest/adminguide/workspaces-access-control.html
+              # grant the ability to enable Amazon WorkDocs for users within Amazon WorkSpaces
+              # https://docs.aws.amazon.com/workspaces/latest/adminguide/workspaces-access-control.html
+              -
+                Effect: Allow
+                Action:
+                  - ds:*
+                Resource: !Sub arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:directory/${directory_identifier}
+              -
                 Effect: Allow
                 Action:
                   - workspaces:*
-                  - ds:*
                   - workdocs:RegisterDirectory
                   - workdocs:DeregisterDirectory
                   - workdocs:AddUserToGroup

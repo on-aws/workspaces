@@ -37,7 +37,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - ds:DescribeDirectories
-                Resource: !Sub arn:aws:ds:${AWS::Region}:${AWS::AccountId}:*/*
+                Resource: '*'
               -
                 Effect: Allow
                 Action:

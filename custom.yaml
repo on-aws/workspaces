@@ -66,10 +66,10 @@ Resources:
                   DirectoryId
                 }).promise();
               }
-              return cfnResponse(event, context, 'SUCCESS');
             } catch(err) {
               console.error(err);
             }
+            return cfnResponse(event, context, 'SUCCESS');
           };
 
           async function cfnResponse (event, context, responseStatus) {

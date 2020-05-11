@@ -42,7 +42,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - workspaces:*
-                Resource: !Sub arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:directory/${DirectoryId}
+                Resource: !Sub arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:*/*
               -
                 Effect: Allow
                 Action:

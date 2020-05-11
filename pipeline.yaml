@@ -133,6 +133,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - lambda:InvokeFunction # to run CludFormation Custom Resource defined at custom.yaml
+                  - ds:DescribeDirectories
                   - workspaces:CreateWorkspaces
                   - workspaces:DeleteWorkspaces
                 Resource: '*'

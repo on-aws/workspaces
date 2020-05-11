@@ -86,6 +86,10 @@ Resources:
                   SubnetIds,
                   EnableWorkDocs: false
                 }).promise();
+                const { Directories } = await workspaces.describeWorkspaceDirectories({
+                  DirectoryIds: [DirectoryId]
+                }).promise();
+                console.log(Directories[0].State);
               }
               if (event.RequestType === 'Delete') {
                 await workspaces.deregisterWorkspaceDirectory({

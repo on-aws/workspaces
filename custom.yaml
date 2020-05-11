@@ -48,6 +48,7 @@ Resources:
               -
                 Effect: Allow
                 Action:
+                  - ec2:*
                   - workspaces:*
                   - workdocs:RegisterDirectory
                   - workdocs:DeregisterDirectory

@@ -254,6 +254,7 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 RoleArn: !GetAtt CodePipelineRole.Arn
                 TemplatePath: !FindInMap [ CONST, TEMPLATE, CUSTOM ]
+                Capabilities: CAPABILITY_IAM
                 ParameterOverrides: !Sub |
                   {
                     "Tag": "${Tag}"
@@ -312,7 +313,6 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 RoleArn: !GetAtt CodePipelineRole.Arn
                 TemplatePath: !FindInMap [ CONST, TEMPLATE, WORKSPACES ]
-                Capabilities: CAPABILITY_IAM
                 ParameterOverrides: !Sub |
                   {
                     "Tag": "${Tag}",

@@ -27,12 +27,14 @@ Resources:
           PolicyDocument:
             Version: 2012-10-17
             Statement:
-              -
+              - # grant the ability to enable Amazon WorkDocs for users within Amazon WorkSpaces
+                # https://docs.aws.amazon.com/workspaces/latest/adminguide/workspaces-access-control.html
                 Effect: Allow
                 Action:
-                  - workspaces:RegisterWorkspaceDirectory
-                  - workspaces:DeregisterWorkspaceDirectory
-                  - ds:DescribeDirectories
+                  - workspaces:*
+                  - ds:*
+                  - workdocs:AddUserToGroup
+                  - workdocs:RemoveUserFromGroup
                 Resource: '*'
 
   Lambda:
@@ -69,7 +71,8 @@ Resources:
             } catch(err) {
               console.error(err);
             }
-            return cfnResponse(event, context, 'SUCCESS');
+            await cfnResponse(event, context, 'SUCCESS');
+            return;
           };
 
           async function cfnResponse (event, context, responseStatus) {

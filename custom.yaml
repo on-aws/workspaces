@@ -37,15 +37,21 @@ Resources:
                 Effect: Allow
                 Action:
                   - ds:*
-                Resource: !Sub arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:directory/${DirectoryId}
+                Resource: !Sub arn:aws:ds:${AWS::Region}:${AWS::AccountId}:directory/${DirectoryId}
               -
                 Effect: Allow
                 Action:
                   - workspaces:*
+                Resource: !Sub arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:directory/${DirectoryId}
+              -
+                Effect: Allow
+                Action:
                   - workdocs:RegisterDirectory
                   - workdocs:DeregisterDirectory
                   - workdocs:AddUserToGroup
                   - workdocs:RemoveUserFromGroup
+                  - kms:ListAliases
+                  - kms:ListKeys
                 Resource: '*'
 
   Lambda:

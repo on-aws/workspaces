@@ -37,7 +37,7 @@ Resources:
                 Effect: Allow
                 Action:
                   - ds:*
-                Resource: !Sub arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:directory/${directory_identifier}
+                Resource: !Sub arn:aws:workspaces:${AWS::Region}:${AWS::AccountId}:directory/${DirectoryId}
               -
                 Effect: Allow
                 Action:

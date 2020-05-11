@@ -32,6 +32,7 @@ Resources:
                 Action:
                   - workspaces:RegisterWorkspaceDirectory
                   - workspaces:DeregisterWorkspaceDirectory
+                  - ds:DescribeDirectories
                 Resource: '*'
 
   Lambda:

@@ -70,11 +70,13 @@ Resources:
                   DirectoryId
                 }).promise();
               }
-              await cfnResponse(event, 'SUCCESS', context.logStreamName, 'SUCCESS');
             } catch(err) {
               console.error(err);
-              await cfnResponse(event, 'FAILED', context.logStreamName, err.message);
+              if (err.code !== 'ResourceNotFoundException') {
+                await cfnResponse(event, 'FAILED', context.logStreamName, err.message);
+              }
             }
+            await cfnResponse(event, 'SUCCESS', context.logStreamName, 'SUCCESS');
             return;
           };
 

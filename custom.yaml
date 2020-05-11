@@ -32,6 +32,7 @@ Resources:
                 Action:
                   - workspaces:RegisterWorkspaceDirectory
                   - workspaces:DeregisterWorkspaceDirectory
+                Resource: '*'
 
   Lambda:
     Type: AWS::Lambda::Function

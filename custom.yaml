@@ -33,6 +33,8 @@ Resources:
                 Action:
                   - workspaces:*
                   - ds:*
+                  - workdocs:RegisterDirectory
+                  - workdocs:DeregisterDirectory
                   - workdocs:AddUserToGroup
                   - workdocs:RemoveUserFromGroup
                 Resource: '*'

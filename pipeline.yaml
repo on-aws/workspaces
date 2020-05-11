@@ -49,6 +49,7 @@ Mappings:
       VPC: VPCSource::template.yaml
       DIRECTORY: DIRECTORYSource::template.yaml
       WORKSPACES: WORKSPACESSource::template.yaml
+      CUSTOM: WORKSPACESSource::custom.yaml
 
 Resources:
   Artifacts:
@@ -112,19 +113,23 @@ Resources:
                     - ds:EnableSso
                   Resource: '*'
                 - !Ref AWS::NoValue
+              - # The following permissions required by custom.yaml
+                Effect: Allow
+                Action:
+                  - iam:GetRole
+                  - iam:CreateRole
+                  - iam:DeleteRole
+                  - iam:AttachRolePolicy
+                  - iam:DetachRolePolicy
+                  - lambda:GetFunction
+                  - lambda:GetFunctionConfiguration
+                  - lambda:CreateFunction
+                  - lambda:DeleteFunction
+                Resource: '*'
               - # The following permissions required by template.yaml
                 Effect: Allow
                 Action:
-                  - iam:GetRole                     # custom
-                  - iam:CreateRole                  # custom
-                  - iam:DeleteRole                  # custom
-                  - iam:AttachRolePolicy            # custom
-                  - iam:DetachRolePolicy            # custom
-                  - lambda:GetFunction              # custom
-                  - lambda:GetFunctionConfiguration # custom
-                  - lambda:CreateFunction           # custom
-                  - lambda:DeleteFunction           # custom
-                  - lambda:InvokeFunction
+                  - lambda:InvokeFunction # to run CludFormation Custom Resource defined at custom.yaml
                   - workspaces:CreateWorkspaces
                   - workspaces:DeleteWorkspaces
                 Resource: '*'
@@ -230,6 +235,31 @@ Resources:
                   }
                 OutputFileName: output.json
               RunOrder: 1
+            - Name: CUSTOM
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: WORKSPACESSource
+              OutputArtifacts:
+                - Name: CUSTOMOutput
+              Configuration:
+                StackName: !Join
+                  - '-'
+                  - - !Select [0, !Split ['/', !Ref Tag]]
+                    - !Select [1, !Split ['/', !Ref Tag]]
+                    - custom
+                ActionMode: CREATE_UPDATE
+                RoleArn: !GetAtt CodePipelineRole.Arn
+                TemplatePath: !FindInMap [ CONST, TEMPLATE, CUSTOM ]
+                ParameterOverrides: !Sub |
+                  {
+                    "Tag": "${Tag}"
+                  }
+                OutputFileName: output.json
+              RunOrder: 1
             - !If
               - CREATEDIRECTORY
               - Name: DIRECTORY
@@ -271,6 +301,7 @@ Resources:
                 - Name: WORKSPACESSource
                 - Name: DIRECTORYOutput
                 - Name: VPCOutput
+                - Name: CUSTOMOutput
               OutputArtifacts:
                 - Name: WORKSPACESOutput
               Configuration:
@@ -286,11 +317,12 @@ Resources:
                   {
                     "Tag": "${Tag}",
                     "DirectoryId": { "Fn::GetParam" : ["DIRECTORYOutput", "output.json", "Directory"]},
+                    "EnableWorkSpacesServiceToken": { "Fn::GetParam" : ["CUSTOMOutput", "output.json", "ServiceToken"]},
                     "PrivateSubnets": { "Fn::GetParam" : ["VPCOutput", "output.json", "PrivateSubnets"]},
                     "BundledId": "${BundledId}"
                   }
                 OutputFileName: output.json
-              RunOrder: 3
+              RunOrder: !If [CREATEDIRECTORY, 3, 2]
 
   # DELETE pipeline is for costs optimization (check optional/frugality/template.yaml).
   # You can also run this pipeline to conveniently delete all the resources when you no longer needed them to avoid unnecessary charges.
@@ -379,6 +411,23 @@ Resources:
                   - - !Select [0, !Split ['/', !Ref Tag]]
                     - !Select [1, !Split ['/', !Ref Tag]]
                     - vpc
+                ActionMode: DELETE_ONLY
+                RoleArn: !GetAtt CodePipelineRole.Arn
+              RunOrder: !If [CREATEDIRECTORY, 3, 2]
+            - Name: CUSTOM
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: Source
+              Configuration:
+                StackName: !Join
+                  - '-'
+                  - - !Select [0, !Split ['/', !Ref Tag]]
+                    - !Select [1, !Split ['/', !Ref Tag]]
+                    - custom
                 ActionMode: DELETE_ONLY
                 RoleArn: !GetAtt CodePipelineRole.Arn
               RunOrder: !If [CREATEDIRECTORY, 3, 2]

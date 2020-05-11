@@ -1,0 +1,115 @@
+Description:  CloudFormayion Custom Reource to help with Amazon WorkSpaces creation
+
+Parameters:
+  Tag:
+    Description: We tag all AWS resources for your convinience.
+    Type: String
+
+Resources:
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          -
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSLambdaExecute
+
+  Lambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.handler
+      Role: !GetAtt LambdaRole.Arn
+      Runtime: nodejs12.x
+      Code:
+        ZipFile: !Sub |
+          'use strict';
+          const AWS   = require('aws-sdk');
+          const workspaces = new AWS.WorkSpaces();
+          const https = require("https");
+          const url = require("url");
+
+          exports.handler = async (event, context) => {
+            console.log(JSON.stringify(event));
+            const { DirectoryId, SubnetIds } = event.ResourceProperties;
+
+            if (event.RequestType === 'Create') {
+              await workspaces.registerWorkspaceDirectory({
+                DirectoryId,
+                SubnetIds,
+                EnableWorkDocs: false
+              }).promise()
+            }
+            if (event.RequestType === 'Delete') {
+              await workspaces.deregisterWorkspaceDirectory({
+                DirectoryId
+              }).promise()
+            }
+            return cfnResponse(event, context, 'SUCCESS');
+          };
+
+          async function cfnResponse (event, context, responseStatus) {
+            return new Promise((resolve, reject) => {
+              const responseBody = JSON.stringify({
+                Status: responseStatus,
+                Reason: "See the details in CloudWatch Log Stream: " + context.logStreamName,
+                PhysicalResourceId: context.logStreamName,
+                StackId: event.StackId,
+                RequestId: event.RequestId,
+                LogicalResourceId: event.LogicalResourceId,
+                NoEcho: false,
+                Data: {}
+              });
+
+              const parsedUrl = url.parse(event.ResponseURL);
+              const options = {
+                hostname: parsedUrl.hostname,
+                port: 443,
+                path: parsedUrl.path,
+                method: "PUT",
+                headers: {
+                  "content-type": "",
+                  "content-length": responseBody.length
+                }
+              };
+
+              const request = https.request(options, (response) => {
+                console.log("Status code: " + response.statusCode);
+                console.log("Status message: " + response.statusMessage);
+                resolve(response);
+              });
+
+              request.on('error', (err) => {
+                console.log({ err });
+                reject(err);
+              });
+
+              request.write(responseBody);
+              request.end();
+            }).catch(err => {
+              console.log(err);
+              throw err;
+            });
+          }
+      Tags:
+        - Key: App
+          Value: !Ref Tag
+        - Key: Name
+          Value: !Ref Tag
+
+  LambdaLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${Lambda}
+      RetentionInDays: 7
+
+Outputs:
+  ServiceToken:
+    Value: !GetAtt Lambda.Arn

@@ -261,6 +261,7 @@ Resources:
               InputArtifacts:
                 - Name: WORKSPACESSource
                 - Name: DIRECTORYOutput
+                - Name: VPCOutput
               OutputArtifacts:
                 - Name: WORKSPACESOutput
               Configuration:
@@ -275,6 +276,7 @@ Resources:
                   {
                     "Tag": "${Tag}",
                     "DirectoryId": { "Fn::GetParam" : ["DIRECTORYOutput", "output.json", "Directory"]},
+                    "PrivateSubnets": { "Fn::GetParam" : ["VPCOutput", "output.json", "PrivateSubnets"]},
                     "BundledId": "${BundledId}"
                   }
                 OutputFileName: output.json

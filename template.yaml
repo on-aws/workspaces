@@ -35,19 +35,19 @@ Resources:
         - !Select [ 0, !Ref PrivateSubnets ]
         - !Select [ 1, !Ref PrivateSubnets ]
 
-  Workspaces:
-    Type: AWS::WorkSpaces::Workspace
-    DependsOn: EnableWorkSpaces
-    Properties:
-      BundleId: !Ref BundledId
-      DirectoryId: !Ref DirectoryId
-      UserName: String
-      WorkspaceProperties:
-        ComputeTypeName: STANDARD
-        RunningMode: AUTO_STOP
-        RunningModeAutoStopTimeoutInMinutes: 60
-      Tags:
-        - Key: App
-          Value: !Ref Tag
-        - Key: Name
-          Value: !Ref Tag
+  #Workspaces:
+  #  Type: AWS::WorkSpaces::Workspace
+  #  DependsOn: EnableWorkSpaces
+  #  Properties:
+  #    BundleId: !Ref BundledId
+  #    DirectoryId: !Ref DirectoryId
+  #    UserName: String
+  #    WorkspaceProperties:
+  #      ComputeTypeName: STANDARD
+  #      RunningMode: AUTO_STOP
+  #      RunningModeAutoStopTimeoutInMinutes: 60
+  #    Tags:
+  #      - Key: App
+  #        Value: !Ref Tag
+  #      - Key: Name
+  #        Value: !Ref Tag

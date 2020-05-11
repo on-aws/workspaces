@@ -44,7 +44,8 @@ Resources:
                   - ds:ListAuthorizedApplications
                   - ds:AuthorizeApplication
                   - ds:UnauthorizeApplication
-                Resource: !Sub arn:aws:ds:${AWS::Region}:${AWS::AccountId}:directory/${DirectoryId}
+                Resource: '*'
+                #Resource: !Sub arn:aws:ds:${AWS::Region}:${AWS::AccountId}:directory/${DirectoryId}
               -
                 Effect: Allow
                 Action:

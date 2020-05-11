@@ -94,7 +94,9 @@ Resources:
               }
             } catch(err) {
               console.error(err);
-              if (err.code !== 'ResourceNotFoundException' || event.RequestType === 'Create') {
+              console.error(err.code);
+              console.error(event.RequestType);
+              if !(err.code === 'ResourceNotFoundException' && event.RequestType === 'Delete') {
                 await cfnResponse(event, 'FAILED', context.logStreamName, err.message);
               }
             }

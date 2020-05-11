@@ -21,6 +21,17 @@ Resources:
               - sts:AssumeRole
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSLambdaExecute
+      Policies:
+        -
+          PolicyName: !Ref AWS::StackName
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Action:
+                  - workspaces:RegisterWorkspaceDirectory
+                  - workspaces:DeregisterWorkspaceDirectory
 
   Lambda:
     Type: AWS::Lambda::Function
@@ -40,19 +51,23 @@ Resources:
             console.log(JSON.stringify(event));
             const { DirectoryId, SubnetIds } = event.ResourceProperties;
 
-            if (event.RequestType === 'Create') {
-              await workspaces.registerWorkspaceDirectory({
-                DirectoryId,
-                SubnetIds,
-                EnableWorkDocs: false
-              }).promise()
+            try {
+              if (event.RequestType === 'Create') {
+                await workspaces.registerWorkspaceDirectory({
+                  DirectoryId,
+                  SubnetIds,
+                  EnableWorkDocs: false
+                }).promise();
+              }
+              if (event.RequestType === 'Delete') {
+                await workspaces.deregisterWorkspaceDirectory({
+                  DirectoryId
+                }).promise();
+              }
+              return cfnResponse(event, context, 'SUCCESS');
+            } catch(err) {
+              console.error(err);
             }
-            if (event.RequestType === 'Delete') {
-              await workspaces.deregisterWorkspaceDirectory({
-                DirectoryId
-              }).promise()
-            }
-            return cfnResponse(event, context, 'SUCCESS');
           };
 
           async function cfnResponse (event, context, responseStatus) {

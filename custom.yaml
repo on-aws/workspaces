@@ -70,19 +70,20 @@ Resources:
                   DirectoryId
                 }).promise();
               }
+              await cfnResponse(event, 'SUCCESS', context.logStreamName, 'SUCCESS');
             } catch(err) {
               console.error(err);
+              await cfnResponse(event, 'FAILED', context.logStreamName, err.message);
             }
-            await cfnResponse(event, context, 'SUCCESS');
             return;
           };
 
-          async function cfnResponse (event, context, responseStatus) {
+          async function cfnResponse (event, responseStatus, PhysicalResourceId, Reason) {
             return new Promise((resolve, reject) => {
               const responseBody = JSON.stringify({
                 Status: responseStatus,
-                Reason: "See the details in CloudWatch Log Stream: " + context.logStreamName,
-                PhysicalResourceId: context.logStreamName,
+                Reason,
+                PhysicalResourceId,
                 StackId: event.StackId,
                 RequestId: event.RequestId,
                 LogicalResourceId: event.LogicalResourceId,

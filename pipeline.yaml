@@ -110,12 +110,21 @@ Resources:
                     - ds:CheckAlias
                     - ds:CreateAlias
                     - ds:EnableSso
-
                   Resource: '*'
                 - !Ref AWS::NoValue
               - # The following permissions required by template.yaml
                 Effect: Allow
                 Action:
+                  - iam:GetRole                     # custom
+                  - iam:CreateRole                  # custom
+                  - iam:DeleteRole                  # custom
+                  - iam:AttachRolePolicy            # custom
+                  - iam:DetachRolePolicy            # custom
+                  - lambda:GetFunction              # custom
+                  - lambda:GetFunctionConfiguration # custom
+                  - lambda:CreateFunction           # custom
+                  - lambda:DeleteFunction           # custom
+                  - lambda:InvokeFunction
                   - workspaces:CreateWorkspaces
                   - workspaces:DeleteWorkspaces
                 Resource: '*'
@@ -272,6 +281,7 @@ Resources:
                 ActionMode: CREATE_UPDATE
                 RoleArn: !GetAtt CodePipelineRole.Arn
                 TemplatePath: !FindInMap [ CONST, TEMPLATE, WORKSPACES ]
+                Capabilities: CAPABILITY_IAM
                 ParameterOverrides: !Sub |
                   {
                     "Tag": "${Tag}",

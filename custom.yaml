@@ -120,12 +120,13 @@ Resources:
 
           async function waitFor(DirectoryId, expected) {
             await new Promise(r => setTimeout(r, 10000));
-            return new Promise((resolve, reject) => {
-              const { Directories } = await workspaces.describeWorkspaceDirectories({
-                DirectoryIds: [DirectoryId]
-              }).promise();
-              Directories[0].Stat === expected ? resolve(state) : reject(state);
-            });
+            const { Directories } = await workspaces.describeWorkspaceDirectories({
+              DirectoryIds: [DirectoryId]
+            }).promise();
+            if(Directories[0].Stat === expected)
+              return Promise.resolve(Directories[0].Stat);
+            else
+              return Promise.reject(Directories[0].Stat);
           }
 
           async function cfnResponse (event, responseStatus, PhysicalResourceId, Reason) {

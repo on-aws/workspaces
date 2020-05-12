@@ -44,6 +44,7 @@ Resources:
     DependsOn: EnableWorkSpaces
     Properties:
       ServiceToken: !Ref CretateUserServiceToken
+      OrganizationId: !Ref DirectoryId
       GivenName: test
       Surname: test
       Username: test

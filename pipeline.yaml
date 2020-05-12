@@ -293,8 +293,7 @@ Resources:
                 Capabilities: CAPABILITY_IAM
                 ParameterOverrides: !Sub |
                   {
-                    "Tag": "${Tag}",
-                    "DirectoryId": { "Fn::GetParam" : ["DIRECTORYOutput", "output.json", "Directory"]}
+                    "Tag": "${Tag}"
                   }
                 OutputFileName: output.json
               RunOrder: !If [CREATEDIRECTORY, 3, 2]

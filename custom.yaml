@@ -5,10 +5,6 @@ Parameters:
     Description: We tag all AWS resources for your convinience.
     Type: String
 
-  DirectoryId:
-    Description: Provide existing AWS Directory Service Id.
-    Type: String
-
 Resources:
   LambdaRole:
     Type: AWS::IAM::Role
@@ -200,12 +196,12 @@ Resources:
 
           exports.handler = async (event, context) => {
             console.log(JSON.stringify(event));
-            const { GivenName, Surname, Username, Password } = event.ResourceProperties;
+            const { OrganizationId, GivenName, Surname, Username, Password } = event.ResourceProperties;
 
             try {
               if (event.RequestType === 'Create') {
                 await workspaces.createUser({
-                  OrganizationId: DirectoryId,
+                  OrganizationId,
                   GivenName,
                   Surname,
                   Username,

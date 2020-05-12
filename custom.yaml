@@ -79,6 +79,7 @@ Resources:
       Handler: index.handler
       Role: !GetAtt LambdaRole.Arn
       Runtime: nodejs12.x
+      Timeout: 60
       Code:
         ZipFile: !Sub |
           'use strict';
@@ -98,10 +99,8 @@ Resources:
                   SubnetIds,
                   EnableWorkDocs: false
                 }).promise();
-                const { Directories } = await workspaces.describeWorkspaceDirectories({
-                  DirectoryIds: [DirectoryId]
-                }).promise();
-                console.log(Directories[0].State);
+
+                await waitFor(DirectoryId, 'REGISTERED');
               }
               if (event.RequestType === 'Delete') {
                 await workspaces.deregisterWorkspaceDirectory({
@@ -118,6 +117,22 @@ Resources:
             await cfnResponse(event, 'SUCCESS', context.logStreamName, 'SUCCESS');
             return;
           };
+
+          async function waitFor(DirectoryId, expected) {
+            return new Promise((resolve, reject) => {
+              let data;
+              let state;
+              do {
+                await new Promise(r => setTimeout(r, 5000));
+                data = await workspaces.describeWorkspaceDirectories({
+                  DirectoryIds: [DirectoryId]
+                }).promise();
+                state = data.Directories[0].State;
+                console.log({ stae });
+              } while (['REGISTERING','DEREGISTERING'].includes(state));
+              state === expected ? resolve(state) : reject(state);
+            });
+          }
 
           async function cfnResponse (event, responseStatus, PhysicalResourceId, Reason) {
             return new Promise((resolve, reject) => {

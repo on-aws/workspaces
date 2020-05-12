@@ -123,10 +123,12 @@ Resources:
             const { Directories } = await workspaces.describeWorkspaceDirectories({
               DirectoryIds: [DirectoryId]
             }).promise();
-            if(Directories[0].Stat === expected)
-              return Promise.resolve(Directories[0].Stat);
+            const state = Directories[0].State;
+            console.log({ state });
+            if(state === expected)
+              return Promise.resolve(state);
             else
-              return Promise.reject(Directories[0].Stat);
+              return Promise.reject(state);
           }
 
           async function cfnResponse (event, responseStatus, PhysicalResourceId, Reason) {

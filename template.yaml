@@ -25,6 +25,10 @@ Parameters:
     Description: AWs Lambda ARN which implements CloudFormation Custom Resource
     Type: String
 
+  CretateUserServiceToken:
+    Description: AWs Lambda ARN which implements CloudFormation Custom Resource
+    Type: String
+
 Resources:
   EnableWorkSpaces:
     Type: Custom::CustomResource
@@ -35,19 +39,29 @@ Resources:
         - !Select [ 0, !Ref PrivateSubnets ]
         - !Select [ 1, !Ref PrivateSubnets ]
 
-  #Workspaces:
-  #  Type: AWS::WorkSpaces::Workspace
-  #  DependsOn: EnableWorkSpaces
-  #  Properties:
-  #    BundleId: !Ref BundledId
-  #    DirectoryId: !Ref DirectoryId
-  #    UserName: String
-  #    WorkspaceProperties:
-  #      ComputeTypeName: STANDARD
-  #      RunningMode: AUTO_STOP
-  #      RunningModeAutoStopTimeoutInMinutes: 60
-  #    Tags:
-  #      - Key: App
-  #        Value: !Ref Tag
-  #      - Key: Name
-  #        Value: !Ref Tag
+  CreateUser:
+    Type: Custom::CustomResource
+    DependsOn: EnableWorkSpaces
+    Properties:
+      ServiceToken: !Ref CretateUserServiceToken
+      GivenName: test
+      Surname: test
+      Username: test
+      Password: MyGreatSecurePasswordNumber1
+
+  Workspaces:
+    Type: AWS::WorkSpaces::Workspace
+    DependsOn: CreateUser
+    Properties:
+      BundleId: !Ref BundledId
+      DirectoryId: !Ref DirectoryId
+      UserName: test
+      WorkspaceProperties:
+        ComputeTypeName: STANDARD
+        RunningMode: AUTO_STOP
+        RunningModeAutoStopTimeoutInMinutes: 60
+      Tags:
+        - Key: App
+          Value: !Ref Tag
+        - Key: Name
+          Value: !Ref Tag

@@ -190,7 +190,7 @@ Resources:
         ZipFile: !Sub |
           'use strict';
           const AWS   = require('aws-sdk');
-          const workspaces = new AWS.WorkSpaces();
+          const workdocs = new AWS.WorkDocs();
           const https = require("https");
           const url = require("url");
 
@@ -200,7 +200,7 @@ Resources:
 
             try {
               if (event.RequestType === 'Create') {
-                await workspaces.createUser({
+                await workdocs.createUser({
                   OrganizationId,
                   GivenName,
                   Surname,

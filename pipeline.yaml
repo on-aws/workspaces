@@ -128,15 +128,13 @@ Resources:
                   - lambda:CreateFunction
                   - lambda:UpdateFunctionCode
                   - lambda:DeleteFunction
+                  - lambda:ListTags
+                  - lambda:TagResource
                 Resource: '*'
               - # The following permissions required by template.yaml
                 Effect: Allow
                 Action:
                   - lambda:InvokeFunction # to run CludFormation Custom Resource defined at custom.yaml
-                  - ds:*
-                  - workspaces:*
-                  - workspaces:CreateWorkspaces
-                  - workspaces:DeleteWorkspaces
                 Resource: '*'
 
   Create:

@@ -127,6 +127,7 @@ Resources:
                   - lambda:GetFunctionConfiguration
                   - lambda:CreateFunction
                   - lambda:UpdateFunctionCode
+                  - lambda:UpdateFunctionConfiguration
                   - lambda:DeleteFunction
                   - lambda:ListTags
                   - lambda:TagResource

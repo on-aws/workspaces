@@ -277,5 +277,5 @@ Outputs:
   EnableWorkSpacesServiceToken:
     Value: !GetAtt EnableWorkSpaces.Arn
 
-  CreateUserUserServiceToken:
+  CreateUserServiceToken:
     Value: !GetAtt CreateUser.Arn

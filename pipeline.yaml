@@ -323,7 +323,7 @@ Resources:
                     "Tag": "${Tag}",
                     "DirectoryId": { "Fn::GetParam" : ["DIRECTORYOutput", "output.json", "Directory"]},
                     "EnableWorkSpacesServiceToken": { "Fn::GetParam" : ["CUSTOMOutput", "output.json", "EnableWorkSpacesServiceToken"]},
-                    "CretateUserServiceToken": { "Fn::GetParam" : ["CUSTOMOutput", "output.json", "CretateUserServiceToken"]},
+                    "CreateUserUserServiceToken": { "Fn::GetParam" : ["CUSTOMOutput", "output.json", "CreateUserUserServiceToken"]},
                     "PrivateSubnets": { "Fn::GetParam" : ["VPCOutput", "output.json", "PrivateSubnets"]},
                     "BundledId": "${BundledId}"
                   }

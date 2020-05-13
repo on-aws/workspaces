@@ -66,9 +66,10 @@ Resources:
                   - workdocs:RegisterDirectory
                   - workdocs:DeregisterDirectory
                 Resource: '*'
-              - # required by CretateUser
+              - # required by CreateUser
                 Effect: Allow
                 Action:
+                  - workdocs:Describe*
                   - workdocs:CreateUser
                 Resource: '*'
 
@@ -182,7 +183,7 @@ Resources:
       LogGroupName: !Sub /aws/lambda/${EnableWorkSpaces}
       RetentionInDays: 7
 
-  CretateUser:
+  CreateUser:
     Type: AWS::Lambda::Function
     Properties:
       Handler: index.handler
@@ -266,15 +267,15 @@ Resources:
         - Key: Name
           Value: !Sub ${Tag}/Lambda/CretateUser
 
-  CretateUserLogGroup:
+  CreateUserUserLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/${CretateUser}
+      LogGroupName: !Sub /aws/lambda/${CreateUser}
       RetentionInDays: 7
 
 Outputs:
   EnableWorkSpacesServiceToken:
     Value: !GetAtt EnableWorkSpaces.Arn
 
-  CretateUserServiceToken:
-    Value: !GetAtt CretateUser.Arn
+  CreateUserUserServiceToken:
+    Value: !GetAtt CreateUser.Arn

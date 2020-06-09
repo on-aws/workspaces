@@ -5,35 +5,52 @@ Description:  >-
 Parameters:
   Tag:
     Description: We tag all AWS resources for your convinience.
+    ConstraintDescription: Forward Slash required
+    AllowedPattern: '^\S+\/\S+'
     Type: String
-
-  DirectoryId:
-    Description: Provide existing AWS Directory Service Id.
-    Type: String
-
-  PrivateSubnets:
-    Description: Choose which private subnets we should deployed to.
-    Type: List<AWS::EC2::Subnet::Id>
+    Default: on-aws/workspaces
 
   BundledId:
     Description: >
       Amazon WorkSpace Bundle Id.
+      We want to use Amazon Linux 2 by default. You can use next command line to find related Amazon Workspaces Bundle.
       aws workspaces describe-workspace-bundles --owner AMAZON --query "Bundles[?Name=='Standard with Amazon Linux 2']".
+      Change filter to <<Standard with Windows 10>> if you need Windows.
     Type: String
-
-  EnableWorkSpacesServiceToken:
-    Description: AWs Lambda ARN which implements CloudFormation Custom Resource
-    Type: String
+    Default: wsb-clj85qzj1
 
 Resources:
+  VPC:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://on-aws-us-east-1-master.s3.amazonaws.com/vpc/template.yaml
+      Parameters:
+        Tag: !Ref Tag
+
+  DIRECTORY:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://on-aws-us-east-1-master.s3.amazonaws.com/directories/template.yaml
+      Parameters:
+        Tag: !Ref Tag
+        VPC: !GetAtt VPC.Outputs.VPC
+        PrivateSubnets: !GetAtt VPC.Outputs.PrivateSubnets
+
+  CUSTOM:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://on-aws-us-east-1-master.s3.amazonaws.com/custom/workspaces/template.yaml
+      Parameters:
+        Tag: !Ref Tag
+
   EnableWorkSpaces:
     Type: Custom::CustomResource
     Properties:
-      ServiceToken: !Ref EnableWorkSpacesServiceToken
-      DirectoryId: !Ref DirectoryId
+      ServiceToken: !GetAtt CUSTOM.Outputs.EnableWorkSpacesServiceToken
+      DirectoryId: !GetAtt DIRECTORY.Outputs.Directory
       SubnetIds:  # we need only 2 subnets (even if more provided)
-        - !Select [ 0, !Ref PrivateSubnets ]
-        - !Select [ 1, !Ref PrivateSubnets ]
+        - !Select [ 0, !GetAtt VPC.Outputs.PrivateSubnets ]
+        - !Select [ 1, !GetAtt VPC.Outputs.PrivateSubnets ]
 
   #Workspaces:
   #  Type: AWS::WorkSpaces::Workspace

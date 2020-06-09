@@ -49,8 +49,8 @@ Resources:
       ServiceToken: !GetAtt CUSTOM.Outputs.EnableWorkSpacesServiceToken
       DirectoryId: !GetAtt DIRECTORY.Outputs.Directory
       SubnetIds:  # we need only 2 subnets (even if more provided)
-        - !Select [ 0, !GetAtt VPC.Outputs.PrivateSubnets ]
-        - !Select [ 1, !GetAtt VPC.Outputs.PrivateSubnets ]
+        - !Select [ 0, !Split [',', !GetAtt VPC.Outputs.PrivateSubnets ]]
+        - !Select [ 1, !Split [',', !GetAtt VPC.Outputs.PrivateSubnets ]]
 
   #Workspaces:
   #  Type: AWS::WorkSpaces::Workspace
